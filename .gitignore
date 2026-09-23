@@ -10,3 +10,5 @@ lab_report.pdf
 template.py
 test_data/
 .claude/
+
+/.venv

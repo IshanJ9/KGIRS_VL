@@ -39,30 +39,11 @@ EXPERIMENT_CONFIG = {
     "aim": "To represent a document collection and a search query as **TF-IDF weighted vectors** in the "
            "vector space model, rank the documents by their **cosine similarity** to the query, observe how "
            "the choice of TF and IDF weighting scheme changes that ranking.",
-    "objectives": [
-        "Understand how Term Frequency (TF) and Inverse Document Frequency (IDF) capture local and "
-        "global term importance respectively.",
-        "Construct TF-IDF weighted vector representations for a document collection and a search query.",
-        "Rank documents by similarity between the query vector and each document vector in the vector "
-        "space model.",
-        "Analyze how different TF and IDF weighting schemes influence retrieval ranking and result quality."
-    ]
+    
 }
 
 THEORY_CONTENT = {
-    "procedure": [
-        "Step 1: Read the Purpose and the Theory page to review TF-IDF weighting and the vector space model.",
-        "Step 2: Open the Simulation page from the sidebar menu.",
-        "Step 3: Inspect (or edit) the sample document corpus - one document per line.",
-        "Step 4: Enter a search query that is relevant to the corpus, or pick one of the sample queries.",
-        "Step 5: Choose a Term Frequency scheme and an Inverse Document Frequency scheme.",
-        "Step 6: Observe the ranked documents, the similarity bar chart, and the underlying TF, IDF and "
-        "TF-IDF matrices.",
-        "Step 7: Click 'Record this trial' after each configuration to log it into your session table.",
-        "Step 8: Repeat for at least 3-4 distinct queries / weighting-scheme combinations.",
-        "Step 9: Complete the assessment Quiz to test your conceptual understanding.",
-        "Step 10: Open the Report page, enter your student information, and download your PDF report."
-    ],
+    
     "key_terms": {
         "Term Frequency (TF)": "How often a term occurs within a single document; may be a raw count, "
                                 "length-normalized, or log-scaled.",
@@ -288,7 +269,49 @@ APPLICATIONS = [
             "Hardware queue: shipping, returns and physical replacement of faulty devices.",
         ],
     },
+    {
+        "name": "E-commerce product search",
+        "icon": ":material/shopping_bag:",
+        "doc": "A product catalogue",
+        "query_is": "A shopper's search",
+        "metric": "nDCG@k",
+        "why": "Common words such as *wireless* appear everywhere. Specific terms such as *noise-cancelling* "
+               "push the most useful products to the top.",
+        "query": "wireless noise cancelling headphones for travel",
+        "corpus": [
+            "Over-ear wireless noise cancelling headphones with a foldable design, long battery life and a travel case.",
+            "Compact wired studio headphones with balanced audio, a detachable cable and a padded headband.",
+            "Wireless earbuds with a charging case, sweat resistance and a secure fit for running and workouts.",
+            "Lightweight travel backpack with a laptop sleeve, water-resistant fabric and multiple organiser pockets.",
+            "Premium noise cancelling headphones with an adjustable headband, microphone and touch controls.",
+        ],
+    },
 ]
+
+APPLICATION_EXPLANATIONS = {
+    "Web and site search": "Each page is a document and the visitor's search is the query. TF counts how often "
+    "query terms appear on each page, while IDF gives more weight to specific terms such as *reset* than to "
+    "common terms such as *account*. Cosine similarity ranks the pages most likely to answer the search first.",
+    "Spam and phishing filtering": "Each message is a document and a message is compared with a profile of "
+    "known spam terms. Words shared by many messages contribute less, while distinctive terms such as *urgent*, "
+    "*suspended* and *verify* receive more weight. The highest-scoring messages can then be sent to a spam queue.",
+    "More-like-this recommendation": "The article being read becomes the query and every catalogue article is a "
+    "document. TF-IDF represents each article by its important terms, reducing the influence of broad words such "
+    "as *search*. Cosine similarity finds articles with a similar topic even when their lengths differ.",
+    "Plagiarism and duplicate detection": "The submitted passage is the query and earlier submissions are the "
+    "documents. TF-IDF highlights unusual phrases shared by both texts, while common academic words receive less "
+    "weight. A high cosine score flags passages that deserve a closer human comparison.",
+    "Resume and job matching": "The job description is the query and each resume is a document. Common words "
+    "such as *experience* contribute little when they occur in many resumes, while skills such as *Python* and "
+    "*deployment* distinguish candidates. The ranked list helps a recruiter review the closest matches first.",
+    "Support ticket routing": "Each support queue is represented by a document containing the issues it handles, "
+    "and an incoming ticket is the query. TF-IDF gives a strong signal to terms that identify one queue, such as "
+    "*invoice* and *tax* for billing. The highest-scoring queue becomes the suggested destination.",
+    "E-commerce product search": "Each product description is a document and the shopper's words form the query. "
+    "TF measures how strongly a product mentions a search term; IDF prevents generic terms such as *wireless* "
+    "from dominating when they appear everywhere. Cosine similarity ranks the products that best match the full "
+    "request, including distinctive terms such as *noise cancelling* and *travel*.",
+}
 
 # The Theory page, written as six topics that each carry one picture. Photographs are hosted on Wikimedia
 # Commons and fetched by the reader's browser, not by the server; every URL was checked to return an
@@ -1352,22 +1375,10 @@ def generate_pdf_report(student_name: str, student_id: str, date_str: str,
     pdf.set_xy(10, box_top + 24)
     pdf.ln(4)
 
-    # 1. Objectives
+    # 1. Recorded Trials Table
     pdf.set_font("Helvetica", "B", 11)
     pdf.set_text_color(30, 58, 138)
-    pdf.cell(0, 7, "1. Learning Objectives", new_x="LMARGIN", new_y="NEXT")
-    pdf.set_font("Helvetica", "", 9)
-    pdf.set_text_color(51, 65, 85)
-    for obj in EXPERIMENT_CONFIG["objectives"]:
-        clean_obj = str(obj).replace("$", "").replace("\\", "")
-        pdf.cell(5, 5, "-", 0)
-        pdf.multi_cell(0, 5, f" {clean_obj}", new_x="LMARGIN", new_y="NEXT")
-    pdf.ln(4)
-
-    # 2. Recorded Trials Table
-    pdf.set_font("Helvetica", "B", 11)
-    pdf.set_text_color(30, 58, 138)
-    pdf.cell(0, 7, "2. Recorded Experimental Trials & Data", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(0, 7, "1. Recorded Experimental Trials & Data", new_x="LMARGIN", new_y="NEXT")
 
     if trials_df.empty:
         pdf.set_font("Helvetica", "I", 9)
@@ -1418,12 +1429,12 @@ def generate_pdf_report(student_name: str, student_id: str, date_str: str,
                     data_row.cell(pdf_text(row[c]))
     pdf.ln(5)
 
-    # 3. Discussion & Notes
+    # 2. Discussion & Notes
     if pdf.get_y() > pdf.h - 45:  # keep the heading together with its text
         pdf.add_page()
     pdf.set_font("Helvetica", "B", 11)
     pdf.set_text_color(30, 58, 138)
-    pdf.cell(0, 7, "3. Observations & Analysis", new_x="LMARGIN", new_y="NEXT")
+    pdf.cell(0, 7, "2. Observations & Analysis", new_x="LMARGIN", new_y="NEXT")
     pdf.set_font("Helvetica", "", 9)
     pdf.set_text_color(51, 65, 85)
     notes_text = student_notes.strip() if student_notes.strip() else (
@@ -1485,34 +1496,19 @@ def highlight_terms(text: str, terms: set) -> str:
 def render_aim_section():
     """Renders the Aim page: the aim statement, the objectives and what the student hands in."""
     st.header("Purpose", icon=":material/flag:")
-    st.caption("What this experiment sets out to do, and why it is worth doing.")
+    
 
     with st.container(border=True):
         st.markdown(EXPERIMENT_CONFIG["aim"])
 
-    left, right = st.columns([3, 2])
-    with left:
-        st.subheader("Objectives", icon=":material/checklist_rtl:")
-        for i, obj in enumerate(EXPERIMENT_CONFIG["objectives"], start=1):
-            st.markdown(f"**{i}.** &nbsp; {obj}")
-    with right:
-        st.subheader("What you hand in", icon=":material/inventory_2:")
-        st.markdown(
-            "- At least **3 recorded trials** across different queries and weighting schemes.\n"
-            "- The **six evaluation parameters** for each trial, measured against relevance judgments.\n"
-            "- A completed **quiz** score.\n"
-            "- A downloaded **PDF lab report** with your trial table and observations."
-        )
-
-    st.divider()
     render_applications_block()
 
 
 def render_theory_section():
     """Renders the Theory page: six topics, each with a picture, then the glossary."""
     st.header("Theory", icon=":material/menu_book:")
-    st.caption("How TF-IDF turns text into vectors and ranks documents against a query, in six steps. "
-               "Read it in order - each step uses the one before it.")
+    
+               
 
     for i, topic in enumerate(THEORY_TOPICS):
         with st.container(border=True):
@@ -1531,27 +1527,11 @@ def render_theory_section():
                 if topic.get("latex"):
                     st.latex(topic["latex"])
 
-    with st.expander(f"Key terms ({len(THEORY_CONTENT['key_terms'])})", icon=":material/dictionary:"):
+    with st.expander(f"Key terms ({len(THEORY_CONTENT['key_terms'])})", icon=":material/dictionary:",
+                     key="key_terms_expander"):
         var_df = pd.DataFrame(list(THEORY_CONTENT["key_terms"].items()), columns=["Term", "Definition"])
-        st.dataframe(
-            var_df, hide_index=True, width="stretch",
-            column_config={"Term": st.column_config.TextColumn(width="medium"),
-                           "Definition": st.column_config.TextColumn(width="large")}
-        )
-
-
-def render_procedure_section():
-    """Renders the Procedure page: the ordered steps, grouped into three phases."""
-    st.header("Procedure", icon=":material/checklist:")
-    st.caption("Follow the steps in order. Steps 3 to 9 all happen on the Simulation page.")
-
-    steps = THEORY_CONTENT["procedure"]
-    for label, icon, start, end in PROCEDURE_PHASES:
-        st.subheader(label, icon=icon)
-        with st.container(border=True):
-            for step in steps[start:end]:
-                name, _, text = step.partition(": ")
-                st.markdown(f"**{name}** &nbsp; {text}")
+        with st.container(key="key_terms_table"):
+            st.table(var_df)
 
 
 ACCENT = "#2A9AA4"
@@ -1573,7 +1553,7 @@ APP_VISUAL_CSS = """
           border-bottom: 1px solid rgba(128, 128, 128, 0.22); }
 .kg-row:last-child { border-bottom: none; }
 .kg-rank { flex: 0 0 1.9rem; height: 1.9rem; border-radius: 50%; display: flex; align-items: center;
-           justify-content: center; font-weight: 700; font-size: .85rem;
+           justify-content: center; font-weight: 700; font-size: 1.05rem;
            background: rgba(128, 128, 128, 0.18); }
 .kg-rank.kg-top { background: #2A9AA4; color: #fff; }
 .kg-body { flex: 1 1 auto; min-width: 0; }
@@ -1581,14 +1561,14 @@ APP_VISUAL_CSS = """
           margin-bottom: .3rem; }
 .kg-bar > span { display: block; height: 100%; border-radius: 4px; background: #2A9AA4; }
 .kg-bar.kg-zero > span { background: rgba(128, 128, 128, 0.35); }
-.kg-text { font-size: .86rem; line-height: 1.45; opacity: .92; }
+.kg-text { font-size: 1.1rem; line-height: 1.5; opacity: .92; }
 .kg-score { flex: 0 0 3.4rem; text-align: right; font-variant-numeric: tabular-nums;
-            font-weight: 600; font-size: .85rem; }
+            font-weight: 600; font-size: 1.05rem; }
 .kg-hit { background: rgba(224, 146, 58, 0.30); color: inherit; padding: 0 .18em; border-radius: 3px; }
-.kg-idfrow { display: flex; align-items: center; gap: .75rem; padding: .3rem 0; }
-.kg-idflab { flex: 0 0 11rem; font-size: .82rem; opacity: .75; }
+.kg-idfrow { display: flex; align-items: center; gap: .9rem; padding: .4rem 0; }
+.kg-idflab { flex: 0 0 12rem; font-size: 1.05rem; opacity: .75; }
 .kg-idfval { flex: 0 0 2.6rem; text-align: right; font-variant-numeric: tabular-nums;
-             font-weight: 600; font-size: .85rem; }
+             font-weight: 600; font-size: 1.05rem; }
 </style>
 """
 
@@ -1736,22 +1716,9 @@ def _svg_open(view_w: int, view_h: int, label: str) -> str:
     return (f'<svg viewBox="0 0 {view_w} {view_h}" role="img" aria-label="{_esc(label)}" '
             f'font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">')
 
-
 def _draw(svg: str, width="stretch") -> None:
-    """Renders an SVG drawing.
-
-    st.html sanitizes with DOMPurify's html-only profile, which strips <svg> outright, so the drawings go
-    through st.image instead - Streamlit inlines them as a data URI. An <img> does not inherit the page's
-    text color, so currentColor is resolved against the active theme here before handing it over.
-    """
-    mode = None
-    try:
-        mode = st.context.theme["type"]
-    except Exception:  # theme is unavailable outside a live script run
-        pass
-    ink = {"light": "#15232A", "dark": "#E3ECEE"}.get(mode, "#7F8C93")
-    st.image(svg.replace("currentColor", ink), width=width)
-
+    """Renders SVG using inline CSS for dynamic theme switching."""
+    st.image(svg, width=width)
 
 def _hero_svg() -> str:
     """The one-drawing answer to 'what does this website actually do?'.
@@ -1876,15 +1843,335 @@ def _benefit_art() -> list:
 
     return ["".join(grid), "".join(knob), "".join(gauge), "".join(report)]
 
+def _web_search_hero_svg() -> str:
+    """An illustrated 3-scene diagram demonstrating web and site search with TF-IDF."""
+    p = [
+        _svg_open(1100, 250, "How web and site search retrieves and ranks help-centre pages using TF-IDF"),
+        f'<defs>'
+        f'<marker id="kgwebflow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" '
+        f'orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" class="svg-ink"/></marker>'
+        f'<style>'
+        f'  .svg-ink {{ fill: #1E293B; stroke: none; }}'
+        f'  .svg-stroke {{ stroke: #1E293B; }}'
+        f'  .svg-card-bg {{ fill: #F8FAFC; stroke: #CBD5E1; }}'
+        f'  .svg-subcard-bg {{ fill: #F1F5F9; stroke: #E2E8F0; }}'
+        f'  .svg-text-muted {{ fill: #64748B; }}'
+        f'  @media (prefers-color-scheme: dark) {{'
+        f'    .svg-ink {{ fill: #F8FAFC; }}'
+        f'    .svg-stroke {{ stroke: #F8FAFC; }}'
+        f'    .svg-card-bg {{ fill: rgba(255, 255, 255, 0.05); stroke: rgba(255, 255, 255, 0.2); }}'
+        f'    .svg-subcard-bg {{ fill: rgba(255, 255, 255, 0.08); stroke: rgba(255, 255, 255, 0.15); }}'
+        f'    .svg-text-muted {{ fill: #94A3B8; }}'
+        f'  }}'
+        f'</style>'
+        f'</defs>'
+    ]
 
+    # --- Scene 1: User Search Query & Parsing (Left: x=30 to x=320) ---
+    p.append('<rect x="30" y="20" width="280" height="162" rx="10" class="svg-card-bg" stroke-width="1.4"/>')
+    p.append(f'<circle cx="48" cy="36" r="3.5" fill="{ACCENT}"/>')
+    p.append('<circle cx="59" cy="36" r="3.5" class="svg-text-muted"/>')
+    p.append('<circle cx="70" cy="36" r="3.5" class="svg-text-muted"/>')
+    p.append('<rect x="84" y="27" width="210" height="18" rx="4" class="svg-subcard-bg"/>')
+    p.append('<text x="94" y="40" font-size="9.5" font-weight="600" class="svg-ink">help.company.com/search</text>')
+
+    p.append(f'<rect x="44" y="58" width="252" height="36" rx="18" class="svg-subcard-bg" stroke="{ACCENT}" stroke-width="2"/>')
+    p.append(f'<circle cx="62" cy="76" r="6.5" fill="none" stroke="{ACCENT}" stroke-width="2.2"/>')
+    p.append(f'<line x1="67" y1="81" x2="74" y2="88" stroke="{ACCENT}" stroke-width="2.4" stroke-linecap="round"/>')
+    p.append('<text x="82" y="80" font-size="12" font-weight="700" class="svg-ink">reset my account password</text>')
+
+    p.append(f'<rect x="44" y="106" width="56" height="22" rx="11" fill="{ACCENT}" fill-opacity="0.25" stroke="{ACCENT}" stroke-width="1.4"/>')
+    p.append(f'<text x="72" y="121" text-anchor="middle" font-size="11" font-weight="700" fill="{ACCENT}">reset</text>')
+
+    p.append('<rect x="106" y="106" width="68" height="22" rx="11" class="svg-subcard-bg"/>')
+    p.append('<text x="140" y="121" text-anchor="middle" font-size="11" font-weight="600" class="svg-ink">account</text>')
+
+    p.append('<rect x="180" y="106" width="76" height="22" rx="11" class="svg-subcard-bg"/>')
+    p.append('<text x="218" y="121" text-anchor="middle" font-size="11" font-weight="600" class="svg-ink">password</text>')
+
+    p.append('<text x="170" y="152" text-anchor="middle" font-size="10" font-style="italic" class="svg-text-muted">(\'my\' dropped as stop word)</text>')
+
+    # --- Scene 2: Corpus TF-IDF Weighting (Center: x=365 to x=725) ---
+    p.append('<rect x="365" y="20" width="355" height="162" rx="10" class="svg-card-bg" stroke-width="1.4"/>')
+    p.append('<text x="382" y="42" font-size="12" font-weight="700" class="svg-ink">Help-Centre Corpus (5 pages)</text>')
+    p.append(f'<text x="702" y="42" text-anchor="end" font-size="11" font-weight="700" fill="{ACCENT}">IDF Weight</text>')
+
+    # reset (rare -> high IDF)
+    p.append(f'<rect x="380" y="54" width="325" height="26" rx="5" fill="{ACCENT}" fill-opacity="0.2" stroke="{ACCENT}" stroke-width="1.2"/>')
+    p.append(f'<text x="390" y="71" font-size="11.5" font-weight="700" fill="{ACCENT}">reset</text>')
+    p.append('<text x="446" y="71" font-size="10" font-weight="600" class="svg-ink">in 2 of 5 docs (rare)</text>')
+    p.append('<rect x="555" y="60" width="105" height="14" rx="3" class="svg-subcard-bg"/>')
+    p.append(f'<rect x="555" y="60" width="90" height="14" rx="3" fill="{ACCENT}"/>')
+    p.append(f'<text x="670" y="72" font-size="11.5" font-weight="800" fill="{ACCENT}">0.40</text>')
+    p.append(f'<circle cx="696" cy="67" r="6.5" fill="{ACCENT}"/>')
+    p.append('<path d="M 693 67 L 695 70 L 699 64" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round"/>')
+
+    # password (medium)
+    p.append('<text x="390" y="99" font-size="11.5" font-weight="700" class="svg-ink">password</text>')
+    p.append('<text x="446" y="99" font-size="10" font-weight="600" class="svg-ink">in 3 of 5 docs (medium)</text>')
+    p.append('<rect x="555" y="88" width="105" height="14" rx="3" class="svg-subcard-bg"/>')
+    p.append(f'<rect x="555" y="88" width="50" height="14" rx="3" fill="{ACCENT}" fill-opacity="0.75"/>')
+    p.append('<text x="670" y="100" font-size="11.5" font-weight="700" class="svg-ink">0.22</text>')
+
+    # account (common -> low IDF)
+    p.append('<text x="390" y="126" font-size="11.5" font-weight="600" class="svg-ink">account</text>')
+    p.append('<text x="446" y="126" font-size="10" font-weight="600" class="svg-ink">in 4 of 5 docs (common)</text>')
+    p.append('<rect x="555" y="115" width="105" height="14" rx="3" class="svg-subcard-bg"/>')
+    p.append('<rect x="555" y="115" width="22" height="14" rx="3" fill="#94A3B8"/>')
+    p.append('<text x="670" y="127" font-size="11.5" font-weight="700" class="svg-ink">0.10</text>')
+
+    # banner
+    p.append(f'<rect x="380" y="145" width="325" height="23" rx="4" fill="{ACCENT}" fill-opacity="0.18" stroke="{ACCENT}" stroke-width="1"/>')
+    p.append(f'<text x="542" y="161" text-anchor="middle" font-size="10.5" font-weight="700" fill="{ACCENT}">Rare term "reset" carries 4x the discriminative weight of "account"</text>')
+
+    # --- Scene 3: Ranked SERP Results (Right: x=770 to x=1070) ---
+    p.append('<rect x="770" y="20" width="300" height="162" rx="10" class="svg-card-bg" stroke-width="1.4"/>')
+    p.append('<text x="786" y="40" font-size="12" font-weight="700" class="svg-ink">Ranked Search Results (SERP)</text>')
+    p.append('<text x="1054" y="40" text-anchor="end" font-size="11" font-weight="700" class="svg-ink">Score</text>')
+
+    # Result #1: D1 (Winner)
+    p.append(f'<rect x="782" y="48" width="276" height="38" rx="5" fill="{ACCENT}" fill-opacity="0.22" stroke="{ACCENT}" stroke-width="1.8"/>')
+    p.append(f'<rect x="788" y="55" width="18" height="18" rx="3" fill="{ACCENT}"/>')
+    p.append('<text x="797" y="68" text-anchor="middle" font-size="11" font-weight="800" fill="#FFFFFF">1</text>')
+    p.append('<text x="814" y="63" font-size="11" font-weight="700" class="svg-ink">D1: Reset your password...</text>')
+    p.append('<text x="814" y="78" font-size="9.5" font-weight="600" class="svg-text-muted">Account settings &gt; link emailed</text>')
+    p.append(f'<text x="1048" y="70" text-anchor="end" font-size="12" font-weight="800" fill="{ACCENT}">0.323</text>')
+
+    # Result #2: D4
+    p.append('<rect x="782" y="90" width="276" height="30" rx="5" class="svg-subcard-bg"/>')
+    p.append('<rect x="788" y="96" width="16" height="16" rx="3" fill="#94A3B8"/>')
+    p.append('<text x="796" y="108" text-anchor="middle" font-size="10" font-weight="700" fill="#FFFFFF">2</text>')
+    p.append('<text x="814" y="104" font-size="10.5" font-weight="700" class="svg-ink">D4: Support desk sign in help</text>')
+    p.append('<text x="814" y="115" font-size="8.5" font-weight="600" class="svg-text-muted">...after a password reset</text>')
+    p.append('<text x="1048" y="109" text-anchor="end" font-size="11" font-weight="700" class="svg-ink">0.244</text>')
+
+    # Result #3: D3
+    p.append('<rect x="782" y="124" width="276" height="24" rx="4" class="svg-subcard-bg"/>')
+    p.append('<text x="796" y="140" text-anchor="middle" font-size="10" font-weight="700" class="svg-ink">3</text>')
+    p.append('<text x="814" y="139" font-size="9.5" font-weight="600" class="svg-ink">D3: Password policy requirements</text>')
+    p.append('<text x="1048" y="140" text-anchor="end" font-size="10.5" font-weight="600" class="svg-ink">0.052</text>')
+
+    p.append('<text x="786" y="167" font-size="9.5" font-weight="600" class="svg-text-muted">D2 (billing): 0.010 &#160;·&#160; D5 (company info): 0.000</text>')
+
+    # Connecting arrows
+    p.append('<line x1="318" y1="100" x2="355" y2="100" class="svg-stroke" stroke-width="2.6" marker-end="url(#kgwebflow)"/>')
+    p.append('<line x1="728" y1="100" x2="760" y2="100" class="svg-stroke" stroke-width="2.6" marker-end="url(#kgwebflow)"/>')
+
+    # Titles & Captions
+    for cx, title, sub in (
+        (170, "1. User queries the site", "Search phrase parsed into searchable terms"),
+        (542, "2. TF-IDF balances the terms", "Ubiquitous words dampened, specific intent amplified"),
+        (920, "3. Highest match ranked #1", "Cosine similarity puts the answer first in results"),
+    ):
+        p.append(f'<text x="{cx}" y="206" text-anchor="middle" font-size="15" font-weight="700" class="svg-ink">{_esc(title)}</text>')
+        p.append(f'<text x="{cx}" y="228" text-anchor="middle" font-size="12" font-weight="600" class="svg-text-muted">{_esc(sub)}</text>')
+
+    p.append("</svg>")
+    return "".join(p)
+def _web_search_pipeline_svg() -> str:
+    """Draws the 4 stages of web search retrieval as an illustrated flow strip."""
+    stages = [
+        {"n": "1", "name": "Crawl & Tokenize", "where": "Web pages to word tokens"},
+        {"n": "2", "name": "Term Frequency (TF)", "where": "Count word occurrences in page"},
+        {"n": "3", "name": "IDF Discrimination", "where": "Down-weight common site jargon"},
+        {"n": "4", "name": "Cosine Scoring & SERP", "where": "Rank best solution at #1"},
+    ]
+
+    parts = [
+        _svg_open(1160, 186, "The four stages of web and site search retrieval"),
+        '<defs><marker id="kgpipetip" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" '
+        'orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/></marker></defs>',
+    ]
+
+    card_w, card_h = 248, 134
+    for i, s in enumerate(stages):
+        x = i * 290 + 10
+        cx = x + card_w / 2
+
+        parts.append(f'<rect x="{x}" y="20" width="{card_w}" height="{card_h}" rx="12" fill="currentColor" '
+                     f'fill-opacity="0.04" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.4"/>')
+
+        parts.append(f'<circle cx="{x + 24}" cy="38" r="12" fill="{ACCENT}"/>')
+        parts.append(f'<text x="{x + 24}" y="43" text-anchor="middle" font-size="13" font-weight="700" '
+                     f'fill="currentColor">{s["n"]}</text>')
+
+        if i == 0:  # Crawl & Tokenize
+            parts.append(f'<rect x="{x + 48}" y="48" width="46" height="56" rx="4" fill="currentColor" '
+                         f'fill-opacity="0.08" stroke="currentColor" stroke-opacity="0.45"/>')
+            parts.append(f'<rect x="{x + 48}" y="48" width="46" height="12" rx="4" fill="currentColor" '
+                         f'fill-opacity="0.14"/>')
+            for ly in (68, 76, 84, 92):
+                parts.append(f'<line x1="{x + 55}" y1="{ly}" x2="{x + 87}" y2="{ly}" '
+                             f'stroke="currentColor" stroke-opacity="0.5" stroke-width="1.8"/>')
+            parts.append(f'<line x1="{x + 102}" y1="76" x2="{x + 118}" y2="76" stroke="currentColor" '
+                         f'stroke-opacity="0.75" stroke-width="2" marker-end="url(#kgpipetip)"/>')
+            tokens = [("reset", ACCENT, 0.4), ("password", ACCENT, 0.25), ("account", "currentColor", 0.18)]
+            for tidx, (tok, clr, op) in enumerate(tokens):
+                ty = 52 + tidx * 18
+                parts.append(f'<rect x="{x + 124}" y="{ty}" width="68" height="14" rx="3" '
+                             f'fill="{clr}" fill-opacity="{op}"/>')
+                parts.append(f'<text x="{x + 158}" y="{ty + 11}" text-anchor="middle" font-size="9.5" '
+                             f'font-weight="700" fill="currentColor">{tok}</text>')
+
+        elif i == 1:  # Term Frequency (TF)
+            parts.append(f'<rect x="{x + 42}" y="48" width="164" height="56" rx="5" fill="currentColor" '
+                         f'fill-opacity="0.06" stroke="currentColor" stroke-opacity="0.35"/>')
+            parts.append(f'<rect x="{x + 48}" y="54" width="34" height="13" rx="2" fill="{ACCENT}" fill-opacity="0.35"/>')
+            parts.append(f'<text x="{x + 65}" y="64" text-anchor="middle" font-size="8.5" font-weight="700" fill="{ACCENT}">Reset</text>')
+            parts.append(f'<text x="{x + 88}" y="64" font-size="8.5" font-weight="500" fill="currentColor">your</text>')
+            parts.append(f'<rect x="{x + 110}" y="54" width="46" height="13" rx="2" fill="{ACCENT}" fill-opacity="0.35"/>')
+            parts.append(f'<text x="{x + 133}" y="64" text-anchor="middle" font-size="8.5" font-weight="700" fill="{ACCENT}">password</text>')
+
+            parts.append(f'<text x="{x + 50}" y="80" font-size="8.5" font-weight="500" fill="currentColor">from the</text>')
+            parts.append(f'<rect x="{x + 85}" y="70" width="40" height="13" rx="2" fill="currentColor" fill-opacity="0.22"/>')
+            parts.append(f'<text x="{x + 105}" y="80" text-anchor="middle" font-size="8.5" font-weight="600" fill="currentColor">account</text>')
+            parts.append(f'<text x="{x + 130}" y="80" font-size="8.5" font-weight="500" fill="currentColor">settings...</text>')
+
+            parts.append(f'<rect x="{x + 48}" y="88" width="152" height="12" rx="2" fill="currentColor" fill-opacity="0.10"/>')
+            parts.append(f'<text x="{x + 124}" y="97" text-anchor="middle" font-size="8" font-weight="700" '
+                         f'fill="{ACCENT}">TF in D1: reset=1 · password=2 · account=1</text>')
+
+        elif i == 2:  # IDF Discrimination
+            parts.append(f'<polygon points="{x + 124},100 {x + 132},100 {x + 128},88" fill="currentColor" fill-opacity="0.6"/>')
+            parts.append(f'<line x1="{x + 116}" y1="100" x2="{x + 140}" y2="100" stroke="currentColor" stroke-opacity="0.6" stroke-width="2"/>')
+            parts.append(f'<line x1="{x + 64}" y1="94" x2="{x + 192}" y2="68" stroke="currentColor" stroke-opacity="0.8" stroke-width="2.5"/>')
+            parts.append(f'<line x1="{x + 64}" y1="94" x2="{x + 64}" y2="101" stroke="currentColor" stroke-opacity="0.6"/>')
+            parts.append(f'<rect x="{x + 42}" y="101" width="46" height="14" rx="2" fill="currentColor" fill-opacity="0.20"/>')
+            parts.append(f'<text x="{x + 65}" y="112" text-anchor="middle" font-size="8" font-weight="600" fill="currentColor">account (0.10)</text>')
+            parts.append(f'<line x1="{x + 192}" y1="68" x2="{x + 192}" y2="75" stroke="currentColor" stroke-opacity="0.6"/>')
+            parts.append(f'<rect x="{x + 168}" y="75" width="48" height="15" rx="2" fill="{ACCENT}" fill-opacity="0.9"/>')
+            parts.append(f'<text x="{x + 192}" y="86" text-anchor="middle" font-size="8.5" font-weight="700" fill="currentColor">reset (0.40)</text>')
+
+        else:  # Cosine Matching & SERP
+            ox, oy = x + 56, 102
+            parts.append(f'<line x1="{ox}" y1="{oy}" x2="{ox + 50}" y2="{oy}" stroke="currentColor" stroke-opacity="0.45" stroke-width="1.8"/>')
+            parts.append(f'<line x1="{ox}" y1="{oy}" x2="{ox}" y2="{oy - 46}" stroke="currentColor" stroke-opacity="0.45" stroke-width="1.8"/>')
+            parts.append(f'<line x1="{ox}" y1="{oy}" x2="{ox + 38}" y2="{oy - 38}" stroke="{ACCENT}" stroke-width="2.4" '
+                         f'marker-end="url(#kgpipetip)"/>')
+            parts.append(f'<text x="{ox + 42}" y="{oy - 38}" font-size="9" font-weight="800" fill="{ACCENT}">Q</text>')
+            parts.append(f'<line x1="{ox}" y1="{oy}" x2="{ox + 46}" y2="{oy - 30}" stroke="currentColor" stroke-opacity="0.85" stroke-width="2" '
+                         f'marker-end="url(#kgpipetip)"/>')
+            parts.append(f'<text x="{ox + 50}" y="{oy - 27}" font-size="8.5" font-weight="700" fill="currentColor">D1</text>')
+            parts.append(f'<path d="M {ox + 18} {oy - 12} A 22 22 0 0 1 {ox + 20} {oy - 17}" fill="none" stroke="currentColor" '
+                         f'stroke-opacity="0.75" stroke-width="1.5"/>')
+            parts.append(f'<text x="{ox + 24}" y="{oy - 12}" font-size="8.5" font-weight="700" fill="currentColor">θ</text>')
+
+            bx = x + 120
+            parts.append(f'<rect x="{bx}" y="52" width="76" height="12" rx="2" fill="{ACCENT}"/>')
+            parts.append(f'<text x="{bx + 4}" y="61" font-size="8" font-weight="800" fill="currentColor">#1 D1 (0.32)</text>')
+            parts.append(f'<rect x="{bx}" y="68" width="58" height="10" rx="2" fill="currentColor" fill-opacity="0.3"/>')
+            parts.append(f'<text x="{bx + 4}" y="76" font-size="7.5" font-weight="700" fill="currentColor">#2 D4 (0.24)</text>')
+            parts.append(f'<rect x="{bx}" y="82" width="30" height="9" rx="2" fill="currentColor" fill-opacity="0.2"/>')
+            parts.append(f'<text x="{bx + 4}" y="89" font-size="7" font-weight="600" fill="currentColor">#3 D3 (0.05)</text>')
+
+        parts.append(f'<text x="{cx}" y="132" text-anchor="middle" font-size="13" font-weight="700" '
+                     f'fill="currentColor">{_esc(s["name"])}</text>')
+        parts.append(f'<text x="{cx}" y="148" text-anchor="middle" font-size="10.5" font-weight="500" fill="currentColor" '
+                     f'fill-opacity="0.85">{_esc(s["where"])}</text>')
+
+        if i < len(stages) - 1:
+            arrow_x = x + card_w + 6
+            parts.append(f'<line x1="{arrow_x}" y1="84" x2="{arrow_x + 22}" y2="84" stroke="currentColor" '
+                         f'stroke-opacity="0.6" stroke-width="2.2" marker-end="url(#kgpipetip)"/>')
+
+    parts.append("</svg>")
+    return "".join(parts)
 def render_applications_block():
     """Renders the orientation block at the foot of the Aim page: what the lab does, why it is worth
     using, a tour of its pages, and where the same technique is used in practice - plus a live retrieval
     over the chosen application's own collection. Not a page of its own; called by render_aim_section()."""
     st.header("Real-world applications", icon=":material/public:")
-    st.caption("New here? Start with this.")
+    
     st.html(APP_VISUAL_CSS)
 
+    # --- First concrete example --------------------------------------------------------------------
+    example = APPLICATIONS[0]
+    st.subheader("Web and site search", icon=":material/travel_explore:")
+    with st.container(border=True):
+        st.markdown(
+            "A search engine treats every page as a **document** and what the visitor types as the "
+            "**query**. For example, the query *reset my account password* is compared with every help-centre page."
+        )
+        st.markdown(
+            "**How TF-IDF helps:** TF counts how often a query term appears on a page. IDF gives more weight "
+            "to specific terms such as *reset* because they appear in fewer pages, while common terms such as "
+            "*account* contribute less. Cosine similarity combines these weighted terms and ranks the pages "
+            "most likely to answer the question first."
+        )
+        example_left, example_right = st.columns(2)
+        with example_left:
+            st.markdown(f"**Query**  \n`{example['query']}`")
+        with example_right:
+            st.markdown(f"**Example document D1**  \n{example['corpus'][0]}")
+
+        _draw(_web_search_hero_svg())
+        with st.expander("How web search retrieval works, stage by stage", icon=":material/account_tree:"):
+            _draw(_web_search_pipeline_svg())
+            st.caption(
+                "How a site search engine indexes help-centre pages, balances term weights with IDF, "
+                "and serves the most relevant article first."
+            )
+
+        st.subheader("Watch one run", icon=":material/play_circle:")
+        names = [a["name"] for a in APPLICATIONS]
+        chosen = st.segmented_control(
+            "Application", options=names, default=names[0], key="app_scenario", required=True,
+            label_visibility="collapsed"
+        )
+        app = next((a for a in APPLICATIONS if a["name"] == chosen), APPLICATIONS[0])
+    
+        # Normalized TF with standard IDF and cosine: the defaults a student meets in the Simulation.
+        result = run_retrieval(app["corpus"], app["query"], TF_SCHEMES[1], IDF_SCHEMES[0], use_cosine=True)
+        doc_ids = [f"D{i + 1}" for i in range(len(app["corpus"]))]
+        matched = set(result["query_tokens"])
+        order = result["ranking"]
+        peak = max(result["scores"]) or 1.0
+    
+        st.markdown(f"**The query** &nbsp; :material/search: &nbsp; *{app['query']}*")
+    
+        # Query terms as chips, sized by how much each one can move the ranking.
+        terms_by_idf = sorted(matched, key=lambda t: result["idf"][t], reverse=True)
+        top_idf = max((result["idf"][t] for t in terms_by_idf), default=0.0) or 1.0
+        chips = []
+        for t in terms_by_idf:
+            size = 13 + 13 * (result["idf"][t] / top_idf)
+            chips.append(f'<span class="kg-chip" style="font-size:{size:.0f}px" title="idf {result["idf"][t]:.3f} '
+                         f'· appears in {result["df"][t]} of {len(app["corpus"])} documents">{_esc(t)}</span>')
+        for t in result["oov_terms"]:
+            chips.append(f'<span class="kg-chip kg-dead" style="font-size:13px" '
+                         f'title="not in this collection, ignored">{_esc(t)}</span>')
+        if chips:
+            st.html(f'<div class="kg-chips">{"".join(chips)}</div>')
+            
+                       
+    
+        st.markdown("**The ranking**")
+        rows = []
+        for rank, i in enumerate(order, start=1):
+            score = result["scores"][i]
+            pct = 100 * score / peak
+            rows.append(
+                f'<div class="kg-row">'
+                f'<div class="kg-rank{" kg-top" if rank == 1 and score > 0 else ""}">{rank}</div>'
+                f'<div class="kg-body">'
+                f'<div class="kg-bar{"" if score > 0 else " kg-zero"}"><span style="width:{max(pct, 1.2):.1f}%"></span></div>'
+                f'<div class="kg-text">{_highlight_html(app["corpus"][i], matched)}</div>'
+                f'</div>'
+                f'<div class="kg-score">{score:.3f}</div>'
+                f'</div>'
+            )
+        st.html(f'<div class="kg-wrap">{"".join(rows)}</div>')
+        st.info(app["why"], icon=":material/lightbulb:")
+    
+        if matched:
+            with st.expander("The weights behind those bars", icon=":material/grid_on:"):
+                terms = terms_by_idf
+                weights = [[result["tfidf_matrix"][i][t] for t in terms] for i in order]
+                _draw(_weight_grid_svg(terms, [doc_ids[i] for i in order], weights))
+                st.caption("Rows in ranked order. Same numbers as the Simulation's Matrices tab.")
+    
+        st.divider()
+    
     # --- What this lab does -------------------------------------------------------------------------
     st.subheader("What this lab does", icon=":material/lightbulb:")
     _draw(_hero_svg())
@@ -1914,81 +2201,22 @@ def render_applications_block():
 
     # --- Gallery ------------------------------------------------------------------------------------
     st.subheader("Where it is used", icon=":material/apps:")
-    for row_start in (0, 3):
+    for row_start in range(0, len(APPLICATIONS), 3):
         cols = st.columns(3)
         for col, a in zip(cols, APPLICATIONS[row_start:row_start + 3]):
             with col:
-                with st.container(border=True):
-                    st.markdown(f"## {a['icon']}")
-                    st.markdown(f"**{a['name']}**")
+                with st.expander(f"{a['icon']}  {a['name']}", expanded=False):
                     st.markdown(
                         f":gray-badge[:material/description: {a['doc']}]  \n"
                         f":gray-badge[:material/search: {a['query_is']}]  \n"
                         f":blue-badge[:material/straighten: {a['metric']}]"
                     )
+                    st.markdown(APPLICATION_EXPLANATIONS[a["name"]])
 
     st.divider()
 
     # --- Live retrieval over the chosen application -------------------------------------------------
-    st.subheader("Watch one run", icon=":material/play_circle:")
-    names = [a["name"] for a in APPLICATIONS]
-    chosen = st.segmented_control(
-        "Application", options=names, default=names[0], key="app_scenario", required=True,
-        label_visibility="collapsed"
-    )
-    app = next((a for a in APPLICATIONS if a["name"] == chosen), APPLICATIONS[0])
-
-    # Normalized TF with standard IDF and cosine: the defaults a student meets in the Simulation.
-    result = run_retrieval(app["corpus"], app["query"], TF_SCHEMES[1], IDF_SCHEMES[0], use_cosine=True)
-    doc_ids = [f"D{i + 1}" for i in range(len(app["corpus"]))]
-    matched = set(result["query_tokens"])
-    order = result["ranking"]
-    peak = max(result["scores"]) or 1.0
-
-    st.markdown(f"**The query** &nbsp; :material/search: &nbsp; *{app['query']}*")
-
-    # Query terms as chips, sized by how much each one can move the ranking.
-    terms_by_idf = sorted(matched, key=lambda t: result["idf"][t], reverse=True)
-    top_idf = max((result["idf"][t] for t in terms_by_idf), default=0.0) or 1.0
-    chips = []
-    for t in terms_by_idf:
-        size = 13 + 13 * (result["idf"][t] / top_idf)
-        chips.append(f'<span class="kg-chip" style="font-size:{size:.0f}px" title="idf {result["idf"][t]:.3f} '
-                     f'· appears in {result["df"][t]} of {len(app["corpus"])} documents">{_esc(t)}</span>')
-    for t in result["oov_terms"]:
-        chips.append(f'<span class="kg-chip kg-dead" style="font-size:13px" '
-                     f'title="not in this collection, ignored">{_esc(t)}</span>')
-    if chips:
-        st.html(f'<div class="kg-chips">{"".join(chips)}</div>')
-        st.caption("Bigger chip, rarer term, more say over the ranking. Faded chips are not in this "
-                   "collection and are dropped.")
-
-    st.markdown("**The ranking**")
-    rows = []
-    for rank, i in enumerate(order, start=1):
-        score = result["scores"][i]
-        pct = 100 * score / peak
-        rows.append(
-            f'<div class="kg-row">'
-            f'<div class="kg-rank{" kg-top" if rank == 1 and score > 0 else ""}">{rank}</div>'
-            f'<div class="kg-body">'
-            f'<div class="kg-bar{"" if score > 0 else " kg-zero"}"><span style="width:{max(pct, 1.2):.1f}%"></span></div>'
-            f'<div class="kg-text">{_highlight_html(app["corpus"][i], matched)}</div>'
-            f'</div>'
-            f'<div class="kg-score">{score:.3f}</div>'
-            f'</div>'
-        )
-    st.html(f'<div class="kg-wrap">{"".join(rows)}</div>')
-    st.info(app["why"], icon=":material/lightbulb:")
-
-    if matched:
-        with st.expander("The weights behind those bars", icon=":material/grid_on:"):
-            terms = terms_by_idf
-            weights = [[result["tfidf_matrix"][i][t] for t in terms] for i in order]
-            _draw(_weight_grid_svg(terms, [doc_ids[i] for i in order], weights))
-            st.caption("Rows in ranked order. Same numbers as the Simulation's Matrices tab.")
-
-    st.divider()
+    
 
     # --- Why a rare term decides the ranking --------------------------------------------------------
     st.subheader("Why the rare word wins", icon=":material/insights:")
@@ -2009,7 +2237,7 @@ def render_applications_block():
 def render_references_section():
     """Renders the References page."""
     st.header("References", icon=":material/library_books:")
-    st.caption("Where the theory, the formulas and the evaluation parameters used in this lab come from.")
+    
 
     total = sum(len(items) for _, _, items in REFERENCES)
     st.markdown(f":gray-badge[:material/format_list_numbered: {total} sources]")
@@ -2021,7 +2249,6 @@ def render_references_section():
             n += 1
             with st.container(border=True):
                 st.markdown(f"**{n}.** &nbsp; {item['cite']}")
-                st.caption(item["note"])
                 link = item.get("url") or (f"https://doi.org/{item['doi']}" if item.get("doi") else None)
                 if link:
                     label = f"doi:{item['doi']}" if item.get("doi") else "Read online"
@@ -2057,6 +2284,30 @@ def _use_sample_query():
 SIMULATION_VISUAL_CSS = """
 <style>
 /* --- Simulation-only visual polish: richer graph-palette colors, no layout/functionality changes --- */
+/* Readable typography for the full simulation workspace. */
+div[data-testid="stAppViewContainer"] [data-testid="stMarkdownContainer"] p,
+div[data-testid="stAppViewContainer"] [data-testid="stCaptionContainer"],
+div[data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"],
+div[data-testid="stAppViewContainer"] label,
+div[data-testid="stAppViewContainer"] button,
+div[data-testid="stAppViewContainer"] input,
+div[data-testid="stAppViewContainer"] textarea,
+div[data-testid="stAppViewContainer"] [data-baseweb="select"],
+div[data-testid="stAppViewContainer"] [data-baseweb="input"] * {
+    font-size: 1.2rem !important;
+}
+div[data-testid="stAppViewContainer"] [data-testid="stMarkdownContainer"] li {
+    font-size: 1.2rem !important;
+}
+div[data-testid="stAppViewContainer"] h1,
+div[data-testid="stAppViewContainer"] h2,
+div[data-testid="stAppViewContainer"] h3 {
+    font-size: 1.2em !important;
+}
+div[data-testid="stAppViewContainer"] [data-testid="stDataFrame"] * {
+    font-size: 1.1rem !important;
+}
+
 div[class*="st-key-sim_hero_"] {
     background:
         radial-gradient(circle at 8% 18%, rgba(42,154,164,.24), transparent 34%),
@@ -2103,7 +2354,7 @@ div[class*="st-key-sim_pipeline_"] .sim_step_pill {
     background:
         linear-gradient(135deg, rgba(42,154,164,.15), rgba(91,143,249,.08) 48%, rgba(224,146,58,.10));
     padding: .30rem .68rem;
-    font-size: .78rem;
+    font-size: 1rem !important;
     font-weight: 650;
     transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
 }
@@ -2139,7 +2390,7 @@ div[class*="st-key-sim_step_"] {
     background:
         linear-gradient(135deg, rgba(42,154,164,.14), rgba(91,143,249,.07) 45%, rgba(224,146,58,.09));
     padding: .28rem .62rem;
-    font-size: .78rem;
+    font-size: 1rem !important;
     font-weight: 650;
     transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
 }
@@ -2317,14 +2568,22 @@ div[class*="st-key-sim_controls_"] [data-baseweb="tab"]:hover {
 
 
 ANIMATION_STEPS = [
-    ("Tokenize", "Tokenize & build vocabulary", ":material/splitscreen:"),
-    ("TF matrix", "Term frequency (TF) matrix", ":material/table_rows:"),
-    ("DF & IDF", "Document frequency & IDF", ":material/query_stats:"),
-    ("TF x IDF", "TF x IDF matrix", ":material/grid_on:"),
-    ("Query vector", "Query vector", ":material/search:"),
-    ("Scoring", "Similarity scoring", ":material/calculate:"),
-    ("Ranking", "Rank documents", ":material/sort:"),
-    ("Top-k", "Top-k results", ":material/emoji_events:"),
+    ("Tokenize", "Tokenize & build vocabulary", ":material/splitscreen:",
+     "The text is cleaned and split into terms. We build the vocabulary from the words that occur in the document collection."),
+    ("TF matrix", "Term frequency (TF) matrix", ":material/table_rows:",
+     "We count how often each vocabulary term appears in each document. This captures a term's local importance."),
+    ("DF & IDF", "Document frequency & IDF", ":material/query_stats:",
+     "We check how many documents contain each term, then give rare terms a larger IDF weight than common terms."),
+    ("TF x IDF", "TF x IDF matrix", ":material/grid_on:",
+     "TF and IDF are multiplied together. Terms that are frequent in one document but rare across the collection now stand out."),
+    ("Query vector", "Query vector", ":material/search:",
+     "The search query is converted into the same weighted vocabulary space so it can be compared fairly with every document."),
+    ("Scoring", "Similarity scoring", ":material/calculate:",
+     "Each document vector is compared with the query vector. A higher score means the document shares more important query terms."),
+    ("Ranking", "Rank documents", ":material/sort:",
+     "Documents are ordered from the highest similarity score to the lowest, producing the retrieval result list."),
+    ("Top-k", "Top-k results", ":material/emoji_events:",
+     "Only the first k documents are shown as the best matches a user should inspect first."),
 ]
 DEFAULT_ANIMATION_SPEED = 1.4  # seconds each step stays on screen while playing
 
@@ -2332,14 +2591,13 @@ DEFAULT_ANIMATION_SPEED = 1.4  # seconds each step stays on screen while playing
 def render_simulation_section():
     """Renders Section 2: a step-by-step walk-through of the TF-IDF pipeline for one query."""
     st.header("Simulation", icon=":material/manage_search:")
-    st.caption("Set a query and a weighting scheme, then step through the pipeline to watch TF-IDF build "
-               "the term-document matrix, weight it by IDF, score it against your query, and rank the results.")
+    
     st.html(SIMULATION_VISUAL_CSS)
     with st.container(key="sim_hero_"):
         st.markdown("**Interactive retrieval workspace**")
         st.caption("Explore how tokenization, TF, IDF, TF-IDF weighting and cosine similarity work together.")
     with st.container(horizontal=True, gap="small", key="sim_pipeline_"):
-        for _step_i, (_short, _long, _icon) in enumerate(ANIMATION_STEPS, start=1):
+        for _step_i, (_short, _long, _icon, _description) in enumerate(ANIMATION_STEPS, start=1):
             st.markdown(f'<div class="sim_step_pill"><b>{_step_i}</b>&nbsp; {_short}</div>', unsafe_allow_html=True)
 
     # --- Controls ---------------------------------------------------------------------------
@@ -2431,6 +2689,25 @@ def render_simulation_section():
     _render_animation_controls(step, n)
     _render_animation_display(ctx, n)
 
+    if step >= n - 1 and not st.session_state["anim_playing"]:
+        st.divider()
+        
+        if st.button("Record this trial", icon=":material/save:", type="primary",
+                     key="record_simulation_trial"):
+            top_index = result["ranking"][0]
+            st.session_state["trials"].append({
+                "Trial #": len(st.session_state["trials"]) + 1,
+                "Query": query.strip(),
+                "TF Scheme": tf_scheme,
+                "IDF Scheme": idf_scheme,
+                "Cosine Norm.": "Yes" if use_cosine else "No",
+                "Top Doc": doc_ids[top_index],
+                "Top Score": result["scores"][top_index],
+                "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            })
+            st.success("Trial recorded. You can review it on the Report page.",
+                       icon=":material/check_circle:")
+
 
 def _inject_step_transition_css():
     st.html("""
@@ -2497,7 +2774,7 @@ def _render_animation_display(ctx: dict, n: int):
     @st.fragment(run_every=interval)
     def _fragment():
         step = st.session_state["anim_step"]
-        _, title, icon = ANIMATION_STEPS[step]
+        _, title, icon, description = ANIMATION_STEPS[step]
 
         st.progress((step + 1) / n, text=f"Step {step + 1} of {n}: **{title}**")
 
@@ -2506,6 +2783,7 @@ def _render_animation_display(ctx: dict, n: int):
         # children) whenever the step changes, which is what replays the CSS fade/slide.
         with st.container(border=True, key=f"anim_step_card_{step}"):
             st.subheader(title, icon=icon)
+            st.info(description, icon=":material/lightbulb:")
             _render_animation_step(step, ctx)
 
         if st.session_state["anim_playing"]:
@@ -2521,6 +2799,26 @@ def _render_animation_display(ctx: dict, n: int):
     _fragment()
 
 
+@st.dialog("TF-IDF details")
+def _show_tfidf_cell_explanation(document_id: str, document_text: str, term: str,
+                                 tf_value: float, idf_value: float, tfidf_value: float):
+    st.subheader(f"Document {document_id}")
+    st.markdown("**Document text**")
+    st.code(document_text, language="text")
+    st.markdown(f"**Selected term:** `{term}`")
+
+    tf_col, idf_col = st.columns(2)
+    with tf_col:
+        st.metric("TF", f"{tf_value:.6f}")
+    with idf_col:
+        st.metric("IDF", f"{idf_value:.6f}")
+
+    st.success(
+        f"{tf_value:.6f} x {idf_value:.6f} = {tfidf_value:.6f}",
+        icon=":material/calculate:"
+    )
+
+
 def _render_animation_step(step: int, ctx: dict):
     corpus, doc_ids, query = ctx["corpus"], ctx["doc_ids"], ctx["query"]
     result, tf_scheme, idf_scheme = ctx["result"], ctx["tf_scheme"], ctx["idf_scheme"]
@@ -2529,8 +2827,6 @@ def _render_animation_step(step: int, ctx: dict):
     query_terms = set(result["query_tokens"])
 
     if step == 0:  # Tokenize & build vocabulary
-        st.markdown("Every document (and the query) is lower-cased, stripped of punctuation, and filtered "
-                    "through a stop-word list. The vocabulary is the set of unique terms left in the corpus.")
         tok_df = pd.DataFrame([
             {"Doc": doc_ids[i], "Tokens": ", ".join(tokenize(corpus[i])) or "_(none)_"}
             for i in range(len(corpus))
@@ -2545,14 +2841,10 @@ def _render_animation_step(step: int, ctx: dict):
         st.caption(f"Vocabulary: **{len(vocab)}** unique terms across **{len(corpus)}** documents.")
 
     elif step == 1:  # TF matrix
-        st.markdown(f"Term frequency ({TF_SHORT[tf_scheme].lower()}) counts how often each term occurs "
-                    "in each document — one row per document, one column per vocabulary term.")
         tf_df = pd.DataFrame(result["tf_matrix"], index=doc_ids, columns=vocab).round(3)
         st.dataframe(tf_df, width="stretch")
 
     elif step == 2:  # DF & IDF
-        st.markdown(f"Document frequency (df) counts how many documents contain each term. "
-                    f"IDF ({IDF_SHORT[idf_scheme]}) then down-weights terms that appear in many documents.")
         idf_df = pd.DataFrame([{"Term": t, "df": result["df"][t], "IDF": result["idf"][t]} for t in vocab])
         idf_df = idf_df.sort_values("IDF", ascending=False)
         st.dataframe(
@@ -2563,14 +2855,41 @@ def _render_animation_step(step: int, ctx: dict):
 
     elif step == 3:  # TF-IDF matrix
         st.latex(r"w_{t,d} = \mathrm{tf}_{t,d} \times \mathrm{idf}_t")
-        st.markdown("Multiplying the TF matrix by the IDF vector (broadcast across every document) gives "
-                    "the TF-IDF weight matrix: high where a term is frequent here but rare elsewhere.")
         tfidf_df = pd.DataFrame(result["tfidf_matrix"], index=doc_ids, columns=vocab).round(4)
-        st.dataframe(tfidf_df, width="stretch")
+        st.caption(f"{len(tfidf_df)} documents x {len(tfidf_df.columns)} terms. Scroll inside the table to view "
+                   "the full matrix.")
+        matrix_event = st.dataframe(
+            tfidf_df,
+            height=460,
+            width="stretch",
+            key="tfidf_matrix_table",
+            on_select="rerun",
+            selection_mode="single-cell",
+            column_config={
+                term: st.column_config.NumberColumn(term, width="small", format="%.3f")
+                for term in vocab
+            },
+        )
+        selected_cells = matrix_event.selection.cells
+        if selected_cells:
+            selected_cell = selected_cells[0]
+            if isinstance(selected_cell, dict):
+                selected_row = selected_cell["row"]
+                selected_term = selected_cell["column"]
+            else:
+                selected_row, selected_term = selected_cell
+            if isinstance(selected_term, int):
+                selected_term = vocab[selected_term]
+            selected_doc = doc_ids[selected_row]
+            tf_value = result["tf_matrix"][selected_row][selected_term]
+            idf_value = result["idf"][selected_term]
+            tfidf_value = result["tfidf_matrix"][selected_row][selected_term]
+            _show_tfidf_cell_explanation(
+                selected_doc, corpus[selected_row], selected_term,
+                tf_value, idf_value, tfidf_value
+            )
 
     elif step == 4:  # Query vector
-        st.markdown("The query is tokenized the same way, then projected into the same TF-IDF space using "
-                    "the corpus's IDF values.")
         if query_terms:
             query_tf = compute_tf(result["query_tokens"], vocab, tf_scheme)
             q_df = pd.DataFrame([
@@ -2584,7 +2903,6 @@ def _render_animation_step(step: int, ctx: dict):
 
     elif step == 5:  # Similarity scoring
         score_label = "Cosine similarity" if use_cosine else "Dot product"
-        st.markdown(f"Each document vector is compared against the query vector using **{score_label}**.")
         _chart_palette = ["#2A9AA4", "#E0923A", "#6C63FF", "#4CAF7D", "#D95F8A", "#5B8FF9"]
         _bar_colors = [
             _chart_palette[i % len(_chart_palette)] if score > 0 else "rgba(128,128,128,0.28)"
@@ -2608,7 +2926,6 @@ def _render_animation_step(step: int, ctx: dict):
         st.plotly_chart(fig, width="stretch", theme="streamlit")
 
     elif step == 6:  # Ranking
-        st.markdown("Documents are sorted in descending order of similarity score.")
         rank_df = pd.DataFrame([
             {"Rank": r, "Doc": doc_ids[i], "Score": result["scores"][i]}
             for r, i in enumerate(result["ranking"], start=1)
@@ -2619,7 +2936,6 @@ def _render_animation_step(step: int, ctx: dict):
         )
 
     else:  # Top-k results
-        st.markdown(f"The **top {top_k}** ranked documents for this query.")
         max_score = max(result["scores"]) or 1.0
         for rank, idx in enumerate(result["ranking"][:top_k], start=1):
             score = result["scores"][idx]
@@ -2664,8 +2980,6 @@ def reset_quiz(new_questions: bool = True):
 def render_quiz_section():
     """Renders Section 3: Assessment Quiz with Self-Grading and Feedback."""
     st.header("Quiz", icon=":material/quiz:")
-    st.caption(f"{QUIZ_LENGTH} questions drawn at random from a bank of {len(QUIZ_QUESTIONS)}. "
-               f"Answers are graded when you submit.")
 
     questions = selected_quiz_questions()
 
@@ -2837,6 +3151,64 @@ def init_session_state():
 # Re-ordering the sidebar's flex children puts the experiment header and progress block above it instead.
 SIDEBAR_ORDER_CSS = """
 <style>
+html {
+    font-size: 112.5% !important;
+}
+[data-testid="stAppViewContainer"] {
+    font-size: 1.2rem !important;
+}
+[data-testid="stMarkdownContainer"] p,
+[data-testid="stMarkdownContainer"] li,
+[data-testid="stCaptionContainer"],
+[data-testid="stWidgetLabel"],
+[data-testid="stAppViewContainer"] label,
+[data-testid="stAppViewContainer"] button,
+[data-testid="stAppViewContainer"] input,
+[data-testid="stAppViewContainer"] textarea,
+[data-testid="stAppViewContainer"] [data-baseweb="select"],
+[data-testid="stAppViewContainer"] [data-baseweb="input"] * {
+    font-size: 1.2rem !important;
+}
+[data-testid="stAppViewContainer"] h1,
+[data-testid="stAppViewContainer"] h2 {
+    font-size: 1.55em !important;
+}
+[data-testid="stAppViewContainer"] h3 {
+    font-size: 1.2em !important;
+}
+[data-testid="stAppViewContainer"] [data-testid="stDataFrame"] * {
+    font-size: 1.1rem !important;
+}
+[data-testid="stAppViewContainer"] [class*="st-key-key_terms_table"] [data-testid="stTable"] * {
+    font-size: 1.15rem !important;
+    line-height: 1.15 !important;
+}
+[data-testid="stAppViewContainer"] [class*="st-key-key_terms_table"] [data-testid="stTable"] table {
+    table-layout: fixed;
+    width: 100%;
+}
+[data-testid="stAppViewContainer"] [class*="st-key-key_terms_table"] [data-testid="stTable"] th,
+[data-testid="stAppViewContainer"] [class*="st-key-key_terms_table"] [data-testid="stTable"] td {
+    padding: .18rem .4rem !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+}
+[data-testid="stAppViewContainer"] [class*="st-key-key_terms_table"] [data-testid="stTable"] td > div {
+    width: 100% !important;
+    max-width: none !important;
+}
+[data-testid="stAppViewContainer"] [class*="st-key-key_terms_table"] [data-testid="stTable"] th:first-child,
+[data-testid="stAppViewContainer"] [class*="st-key-key_terms_table"] [data-testid="stTable"] td:first-child {
+    width: 34%;
+}
+[data-testid="stAppViewContainer"] [class*="st-key-key_terms_table"] [data-testid="stTable"] th:last-child,
+[data-testid="stAppViewContainer"] [class*="st-key-key_terms_table"] [data-testid="stTable"] td:last-child {
+    width: 66%;
+}
+[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
+[data-testid="stSidebar"] [data-testid="stCaptionContainer"] {
+    font-size: 1.2rem !important;
+}
 [data-testid="stSidebarContent"] { display: flex; flex-direction: column; }
 [data-testid="stSidebarHeader"] { order: 0; }
 [data-testid="stSidebarUserContent"] { order: 1; padding-bottom: 0.75rem; }
@@ -2881,8 +3253,7 @@ def render_sidebar_progress():
         if st.session_state.get("quiz_submitted", False):
             score = st.session_state.get("quiz_score", 0)
             st.progress(score / QUIZ_LENGTH, text=f"Quiz: {score} / {QUIZ_LENGTH}")
-        else:
-            st.badge("Quiz not submitted", icon=":material/schedule:", color="orange")
+        
 
 
 def main():
@@ -2893,12 +3264,12 @@ def main():
     )
 
     init_session_state()
-    st.html(SIDEBAR_ORDER_CSS)
+    st.markdown(SIDEBAR_ORDER_CSS, unsafe_allow_html=True)
 
     page = st.navigation([
         st.Page(render_aim_section, title="Purpose", icon=":material/flag:", url_path="aim", default=True),
         st.Page(render_theory_section, title="Theory", icon=":material/menu_book:", url_path="theory"),
-        st.Page(render_procedure_section, title="Procedure", icon=":material/checklist:", url_path="procedure"),
+        
         st.Page(render_references_section, title="References", icon=":material/library_books:",
                 url_path="references"),
         st.Page(render_simulation_section, title="Simulation", icon=":material/manage_search:", url_path="simulation"),
